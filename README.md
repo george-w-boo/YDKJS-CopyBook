@@ -100,6 +100,12 @@ In addition to defining behaviors for specific properties, certain behaviors are
 
 </details>
 
+____
+
+## Chapter 3: Classy Objects
+
+
+
 
 <details>
 <summary></summary>
