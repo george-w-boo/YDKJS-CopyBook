@@ -258,6 +258,126 @@ Point2d.samePoint(one,one);         // true
 
 </details> 
 
+<details>
+<summary>private statics</summary>
+  
+Static properties and functions can also use # to be marked as private:
+ 
+```
+class Point2d {
+    static #errorMsg = "Out of bounds."
+    static #printError() {
+        console.log(`Error: ${this.#errorMsg}`);
+    }
+
+    // publics
+    x
+    y
+    constructor(x,y) {
+        if (x > 100 || y > 100) {
+            Point2d.#printError();
+        }
+        this.x = x;
+        this.y = y;
+    }
+}
+
+var one = new Point2d(30,400);
+// Error: Out of bounds.
+```
+  
+The #printError() static private function here has a this, but that's referencing the Point2d class, not an instance. As such, the #errorMsg and #printError() are independent of instances and thus are best as statics. Moreover, there's no reason for them to be accessible outside the class, so they're marked private.
+
+Remember: private statics are similarly not-inherited by subclasses just as private members/methods are not.
+
+Gotcha: Subclassing With Static Privates and this
+Recall that inherited methods, invoked from a subclass, have no trouble accessing (via this.#whatever style references) any privates from their own base class:
+
+```
+class Point2d {
+    // ..
+
+    getID() {
+        return this.#ID;
+    }
+
+    // ..
+}
+
+class Point3d extends Point2d {
+    // ..
+
+    printID() {
+        console.log(`ID: ${this.getID()}`);
+    }
+}
+
+var point = new Point3d(3,4,5);
+point.printID();
+// ID: ..
+```
+  
+That works just fine.
+
+Unfortunately, and (to me) quite unexpectedly/inconsistently, the same is not true of private statics accessed from inherited public static functions:
+
+```
+class Point2d {
+    static #errorMsg = "Out of bounds."
+    static printError() {
+        console.log(`Error: ${this.#errorMsg}`);
+    }
+
+    // ..
+}
+
+class Point3d extends Point2d {
+    // ..
+}
+
+Point2d.printError();
+// Error: Out of bounds.
+
+Point3d.printError === Point2d.printError;
+// true
+
+Point3d.printError();
+// TypeError: Cannot read private member #errorMsg
+// from an object whose class did not declare it
+```
+  
+The printError() static is inherited (shared via [[Prototype]]) from Point2d to Point3d just fine, which is why the function references are identical. Like the non-static snippet just above, you might have expected the Point3d.printError() static invocation to resolve via the [[Prototype]] chain to its original base class (Point2d) location, thereby letting it access the base class's #errorMsg static private.
+
+But it fails, as shown by the last statement in that snippet. The reason it fails here, but not with the previous snippet, is a convoluted brain twister. I'm not going to dig into the why explanation here, frankly because it boils my blood to do so.
+
+There's a fix, though. In the static function, instead of this.#errorMsg, swap that for Point2d.#errorMsg, and now it works:
+  
+```
+class Point2d {
+    static #errorMsg = "Out of bounds."
+    static printError() {
+        // the fixed reference vvvvvv
+        console.log(`Error: ${Point2d.#errorMsg}`);
+    }
+
+    // ..
+}
+
+class Point3d extends Point2d {
+    // ..
+}
+
+Point2d.printError();
+// Error: Out of bounds.
+
+Point3d.printError();
+// Error: Out of bounds.  <-- phew, it works now!
+```
+
+If public static functions are being inherited, use the class name to access any private statics instead of using this. references. Beware that gotcha!
+
+
+</details>
 
 <details>
 <summary></summary>
