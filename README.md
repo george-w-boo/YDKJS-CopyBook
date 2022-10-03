@@ -375,7 +375,77 @@ Point3d.printError();
 ```
 
 If public static functions are being inherited, use the class name to access any private statics instead of using this. references. Beware that gotcha!
+</details>
 
+  
+<details>
+<summary>this vs super vs new.target</summary>
+
+this - refers to the instance of the class if the member or method is public. If it's static, than it refers to the class constructo function itself.
+
+super - is used if you want to access an inherited method from a subclass even if it's been overriden:
+  
+```
+class Point2d {
+    x = 3
+    y = 4
+
+    getX() {
+        return this.x;
+    }
+}
+
+class Point3d extends Point2d {
+    x = 21
+    y = 10
+    z = 5
+
+    getX() {
+        return this.x * 2;
+    }
+    printX() {
+        console.log(`x: ${super.getX()}`);
+    }
+}
+
+var point = new Point3d();
+
+point.printX();       // x: 21
+```
+
+In addition to a subclass method accessing an inherited method definition (even if overriden on the subclass) via super. reference, a subclass constructor can manually invoke the inherited base class constructor via super(..) function invocation:
+
+```
+class Point2d {
+    x
+    y
+    constructor(x,y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class Point3d extends Point2d {
+    z
+    constructor(x,y,z) {
+        super(x,y);
+        this.z = z;
+    }
+    toString() {
+        console.log(`(${this.x},${this.y},${this.z})`);
+    }
+}
+
+var point = new Point3d(3,4,5);
+
+point.toString();       // (3,4,5)
+```
+  
+An explicitly defined subclass constructor must call super(..) to run the inherited class's initialization, and that must occur before the subclass constructor makes any references to this or finishes/returns. Otherwise, a runtime exception will be thrown when that subclass constructor is invoked (via new). If you omit the subclass constructor, the default constructor automatically thankfully invokes super() for you.
+  
+new.target - is used if you may need to determine in a constructor if that class is being instantiated directly, or being instantiated from a subclass with a super() call:
+  
+```
 
 </details>
 
