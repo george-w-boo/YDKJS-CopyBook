@@ -104,7 +104,50 @@ ____
 
 ## Chapter 3: Classy Objects
 
+<details>
+<summary>static</summary>
+  
+  `static` - methods/fields reside on the constructor (function object) itself (neither on the constructor prototype nor on the instance). This behaviour is useful when developers need access to some class-related data independed of any instance they may or may have created. Static property or static functions can also be called non-instance properties and instance unaware functions.
 
+```
+class Point2d {
+    // class statics
+    static origin = new Point2d(0,0)
+    static distance(point1,point2) {
+        return Math.sqrt(
+            ((point2.x - point1.x) ** 2) +
+            ((point2.y - point1.y) ** 2)
+        );
+    }
+    ...
+ }
+ 
+console.log(`Starting point: ${Point2d.origin}`);
+// Starting point: (0,0)
+
+var next = new Point2d(3,4);
+console.log(`Next point: ${next}`);
+// Next point: (3,4)
+
+console.log(`Distance: ${
+    Point2d.distance( Point2d.origin, next )
+}`);
+// Distance: 5
+```
+  
+The `Point2d.origin` is a static property, which just so happens to hold a constructed instance of our class. And `Point2d.distance(..)` is a static function that computes the 2-dimensional cartesian distance between two points.
+
+Of course, we could have put these two somewhere other than as statics on the class definition. But since they're directly related to the `Point2d` class, it makes most sense to organize them there.
+  
+The value in a static initialization (`static whatever = ..`) can include `this` references, which refers to the class itself (actually, the constructor) rather than to an instance:
+  
+</details>
+
+
+<details>
+<summary>private</summary>
+  
+</details>
 
 
 <details>
