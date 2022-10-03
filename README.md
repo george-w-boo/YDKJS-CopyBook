@@ -146,8 +146,117 @@ The value in a static initialization (`static whatever = ..`) can include `this`
 
 <details>
 <summary>private</summary>
+
+`private` - stores info that cannot be seen from outside the class. Private members/methods are private only to the class they're defined in, and are not inherited in any way by a subclass.
+
+```
+class Point2d {
+    // statics
+    static samePoint(point1,point2) {
+        return point1.#ID === point2.#ID;
+    }
+
+    // privates
+    #ID = null
+    #assignID() {
+        this.#ID = Math.round(Math.random() * 1e9);
+    }
+
+    // publics
+    x
+    y
+    constructor(x,y) {
+        this.#assignID();
+        this.x = x;
+        this.y = y;
+    }
+}
+
+var one = new Point2d(3,4);
+var two = new Point2d(3,4);
+
+Point2d.samePoint(one,two);         // false
+Point2d.samePoint(one,one);         // true
+```
+
+The `#whatever` syntax (including this.#whatever form) is only valid inside class bodies. It will throw syntax errors if used outside of a class.
+
+Unlike public fields/instance members, private fields/instance members must be declared in the class body. You cannot add a private member to a class declaration dynamically while in the constructor method; `this.#whatever = ..` type assignments only work if the `#whatever` private field is declared in the class body. Moreover, though private fields can be re-assigned, they cannot be deleted from an instance, the way a public field/class member can.
   
-</details>
+Because "inheritance" in JS is sharing (through the [[Prototype]] chain), if you invoke an inherited method in a subclass, and that inherited method in turn accesses/invokes privates in its host (base) class, this works fine:
+
+```
+class Point2d { /* .. */ }
+
+class Point3d extends Point2d {
+    z
+    constructor(x,y,z) {
+        super(x,y);
+        this.z = z;
+    }
+}
+
+var one = new Point3d(3,4,5);
+```
+  
+It's still a shame though that Point3d has no way to access/influence, or indeed even knowledge of, the #ID / #assignID() privates from Point2d:
+
+```
+class Point2d { /* .. */ }
+
+class Point3d extends Point2d {
+    z
+    constructor(x,y,z) {
+        super(x,y);
+        this.z = z;
+
+        console.log(this.#ID);      // will throw!
+    }
+}
+```
+  
+You may want to check to see if a private field/method exists on an object instance. For example (as shown below), you may have a static function or method in a class, which receives an external object reference passed in. To check to see if the passed-in object reference is of this same class (and therefore has the same private members/methods in it), you basically need to do a "brand check" against the object.
+
+Such a check could be rather convoluted, because if you access a private field that doesn't already exist on the object, you get a JS exception thrown, requiring ugly try..catch logic.
+
+But there's a cleaner approach, so called an "ergonomic brand check", using the in keyword:
+  
+```
+  class Point2d {
+    // statics
+    static samePoint(point1,point2) {
+        // "ergonomic brand checks"
+        if (#ID in point1 && #ID in point2) {
+            return point1.#ID === point2.#ID;
+        }
+        return false;
+    }
+
+    // privates
+    #ID = null
+    #assignID() {
+        this.#ID = Math.round(Math.random() * 1e9);
+    }
+
+    // publics
+    x
+    y
+    constructor(x,y) {
+        this.#assignID();
+        this.x = x;
+        this.y = y;
+    }
+}
+
+var one = new Point2d(3,4);
+var two = new Point2d(3,4);
+
+Point2d.samePoint(one,two);         // false
+Point2d.samePoint(one,one);         // true
+```
+  
+
+</details> 
 
 
 <details>
