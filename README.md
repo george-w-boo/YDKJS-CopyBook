@@ -377,7 +377,6 @@ Point3d.printError();
 If public static functions are being inherited, use the class name to access any private statics instead of using this. references. Beware that gotcha!
 </details>
 
-  
 <details>
 <summary>this vs super vs new.target</summary>
 
@@ -444,10 +443,72 @@ point.toString();       // (3,4,5)
 An explicitly defined subclass constructor must call super(..) to run the inherited class's initialization, and that must occur before the subclass constructor makes any references to this or finishes/returns. Otherwise, a runtime exception will be thrown when that subclass constructor is invoked (via new). If you omit the subclass constructor, the default constructor automatically thankfully invokes super() for you.
   
 new.target - is used if you may need to determine in a constructor if that class is being instantiated directly, or being instantiated from a subclass with a super() call:
-  
-```
 
 </details>
+
+## Chapter 4: This works
+
+<details>
+<summary>Default Context Invocation</summary>
+  
+```
+var point = {
+  x: null,
+  y: null,
+
+  init(x,y) {
+      this.x = x;
+      this.y = y;
+  }
+};
+```
+
+What will `this` refer to here:
+
+```
+const init = point.init;
+init(3,4);
+```
+  
+Since almost all modern JS code is being run in strict mode (ESM (ES Modules) always run in strict-mode, as does code inside a class block. And virtually all transpiled JS code (via Babel, TypeScript, etc) is written to declare strict-mode), `this` will refer to undefined here.
+
+</details>
+  
+<details>
+<summary>Explicit Context Invocation</summary>
+  
+```
+var point = {
+    x: null,
+    y: null,
+
+    init(x,y) {
+        this.x = x;
+        this.y = y;
+    },
+    rotate(angleRadians) { /* .. */ },
+    toString() {
+        return `(${this.x},${this.y})`;
+    },
+};
+
+point.init(3,4);
+
+var anotherPoint = {};
+point.init.call( anotherPoint, 5, 6 );
+
+point.x;                // 3
+point.y;                // 4
+anotherPoint.x;         // 5
+anotherPoint.y;         // 6
+```
+
+I wanted to define anotherPoint, but I didn't want to repeat the definitions of those init(..) / rotate(..) / toString() functions from point. So I "borrowed" a function reference, point.init, and explicitly set the empty object anotherPoint as the this context, via call(..).
+
+When init(..) is running at that moment, this inside it will reference anotherPoint, and that's why the x / y properties (values 5 / 6, respectively) get set there.
+
+</details>
+
 
 <details>
 <summary></summary>
