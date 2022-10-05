@@ -509,6 +509,57 @@ When init(..) is running at that moment, this inside it will reference anotherPo
 
 </details>
 
+<details>
+<summary>New Context Invocation</summary>
+  
+```
+var point = {
+    // ..
+
+    init: function() { /* .. */ }
+
+    // ..
+};
+
+var anotherPoint = new point.init(3,4);
+
+anotherPoint.x;     // 3
+anotherPoint.y;     // 4
+```
+  
+  This example has a bit of nuance to be explained. The init: function() { .. } form shown here -- specifically, a function expression assigned to a property -- is required for the function to be validly called with the new keyword. From previous snippets, the concise method form of init() { .. } defines a function that cannot be called with new.
+  
+In a sense, the new keyword hijacks a function and forces its behavior into a different mode than a normal invocation. Here are the 4 special steps that JS performs when a function is invoked with new:
+
+create a brand new empty object, out of thin air.
+
+link the [[Prototype]] of that new empty object to the function's .prototype object (see Chapter 2).
+
+invoke the function with the this context set to that new empty object.
+
+if the function doesn't return its own object value explicitly (with a return .. statement), assume the function call should instead return the new object (from steps 1-3).
+  
+</details>
+
+<details>
+<summary>Review This</summary>
+  
+We've seen four rules for this context assignment in function calls. Let's put them in order of precedence:
+
+1 Is the function invoked with new, creating and setting a new this?
+
+2 Is the function invoked with call(..) or apply(..), explicitly setting this?
+
+3 Is the function invoked with an object reference at the call-site (e.g., point.init(..)), implicitly setting this?
+
+4 If none of the above... are we in non-strict mode? If so, default the this to globalThis. But if in strict-mode, default the this to undefined.
+
+These rules, in this order, are how JS determines the this for a function invocation. If multiple rules match a call-site (e.g., new point.init.call(..)), the first rule from the list to match wins.
+</details>
+
+<details>
+<summary></summary>
+</details>
 
 <details>
 <summary></summary>
