@@ -558,6 +558,46 @@ These rules, in this order, are how JS determines the this for a function invoca
 </details>
 
 <details>
+<summary>Lexical this in arrow functions</summary>
+  
+```
+function outer() {
+    console.log(this.value);
+
+    // define a return an "inner"
+    // function
+    var inner = () => {
+        console.log(this.value);
+    };
+
+    return inner;
+}
+
+var one = {
+    value: 42,
+};
+var two = {
+    value: "sad face",
+};
+
+var innerFn = outer.call(one);
+// 42
+
+innerFn.call(two);
+// 42   <-- not "sad face"
+```
+
+When the innerFn(..) (aka inner(..)) function is invoked, even with an explicit context assignment via .call(..), that assignment is ignored.
+
+I'm not sure why `=>` arrow functions even have a `call(..)` / `apply(..)` on them, since they are silent no-op functions. I guess it's for consistency with normal functions. But as we'll see later, there are other inconsistencies between regular functions and irregular `=>` arrow functions.
+  
+When a this is encountered (this.value) inside an => arrow function, this is treated like a normal lexical variable, not a special keyword. And since there is no this variable in that function itself, JS does what it always does with lexical variables: it goes up one level of lexical scope -- in this case, to the surrounding outer(..) function, and it checks to see if there's any registered this in that scope.
+
+Luckily, outer(..) is a regular function, which means it has a normal this keyword. And the outer.call(one) invocation assigned one to its this.
+
+</details>
+  
+<details>
 <summary></summary>
 </details>
 
