@@ -596,12 +596,3 @@ When a this is encountered (this.value) inside an => arrow function, this is tre
 Luckily, outer(..) is a regular function, which means it has a normal this keyword. And the outer.call(one) invocation assigned one to its this.
 
 </details>
-  
-<details>
-<summary></summary>
-</details>
-
-<details>
-<summary></summary>
-</details>
-
