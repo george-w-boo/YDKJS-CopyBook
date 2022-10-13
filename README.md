@@ -159,5 +159,77 @@ But you have to be careful with the . operator. Since . is a valid numeric chara
 </details>
 
 <details>
+<summary>Use case for the void operator</summary>
+
+But the void operator can be useful in a few other circumstances, if you need to ensure that an expression has no result value (even if it has side effects).
+
+For example:
+  
+```
+  function doSomething() {
+	// note: `APP.ready` is provided by our application
+	if (!APP.ready) {
+		// try again later
+		return void setTimeout( doSomething, 100 );
+	}
+
+	var result;
+
+	// do some other stuff
+	return result;
+}
+
+// were we able to do it right away?
+if (doSomething()) {
+	// handle next tasks right away
+}
+  ```
+  
+  Here, the setTimeout(..) function returns a numeric value (the unique identifier of the timer interval, if you wanted to cancel it), but we want to void that out so that the return value of our function doesn't give a false-positive with the if statement.
+
+Many devs prefer to just do these actions separately, which works the same but doesn't use the void operator:
+  
+  ```
+  if (!APP.ready) {
+	// try again later
+	setTimeout( doSomething, 100 );
+	return;
+}
+  ```
+  
+  In general, if there's ever a place where a value exists (from some expression) and you'd find it useful for the value to be undefined instead, use the void operator. That probably won't be terribly common in your programs, but in the rare cases you do need it, it can be quite helpful.
+</details>
+
+<details>
+<summary>NaN</summary>
+  
+  In other words: "the type of not-a-number is 'number'!"
+  ```
+  var a = 2 / "foo";		// NaN
+
+typeof a === "number";	// true
+  ```
+  
+  The isNaN(..) utility has a fatal flaw. It appears it tried to take the meaning of NaN ("Not a Number") too literally -- that its job is basically: "test if the thing passed in is either not a number or is a number." But that's not quite accurate.
+  
+  ```
+  var a = 2 / "foo";
+var b = "foo";
+
+a; // NaN
+b; // "foo"
+
+window.isNaN( a ); // true
+window.isNaN( b ); // true -- ouch!
+  ```
+  
+  Clearly, "foo" is literally not a number, but it's definitely not the NaN value either! This bug has been in JS since the very beginning (over 19 years of ouch).
+  
+  As of ES6, finally a replacement utility has been provided: Number.isNaN(..).
+  
+</details>
+
+
+<details>
 <summary></summary>
 </details>
