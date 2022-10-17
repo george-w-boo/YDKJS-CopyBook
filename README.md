@@ -235,55 +235,60 @@ window.isNaN( b ); // true -- ouch!
 
 If you want to distinguish a -0 from a 0 in your code, you can't just rely on what the developer console outputs, so you're going to have to be a bit more clever:
 
-	```
-	function isNegZero(n) {
-	n = Number( n );
-	return (n === 0) && (1 / n === -Infinity);
+```
+
+function isNegZero(n) {
+n = Number( n );
+return (n === 0) && (1 / n === -Infinity);
 }
 
-isNegZero( -0 );		// true
-isNegZero( 0 / -3 );	// true
-isNegZero( 0 );			// false
-	```
+isNegZero( -0 ); // true
+isNegZero( 0 / -3 );  // true
+isNegZero( 0 );	// false
+
+```
 	
-	Now, why do we need a negative zero, besides academic trivia?
+Now, why do we need a negative zero, besides academic trivia?
 
 There are certain applications where developers use the magnitude of a value to represent one piece of information (like speed of movement per animation frame) and the sign of that number to represent another piece of information (like the direction of that movement).
 
 In those applications, as one example, if a variable arrives at zero and it loses its sign, then you would lose the information of what direction it was moving in before it arrived at zero. Preserving the sign of the zero prevents potentially unwanted information loss.
+
 </details>
 
 <details>
 <summary>Special Equality</summary>
 	
-	As we saw above, the NaN value and the -0 value have special behavior when it comes to equality comparison. NaN is never equal to itself, so you have to use ES6's Number.isNaN(..) (or a polyfill). Similarly, -0 lies and pretends that it's equal (even === strict equal -- see Chapter 4) to regular positive 0, so you have to use the somewhat hackish isNegZero(..) utility we suggested above.
+As we saw above, the NaN value and the -0 value have special behavior when it comes to equality comparison. NaN is never equal to itself, so you have to use ES6's Number.isNaN(..) (or a polyfill). Similarly, -0 lies and pretends that it's equal (even === strict equal -- see Chapter 4) to regular positive 0, so you have to use the somewhat hackish isNegZero(..) utility we suggested above.
 
 As of ES6, there's a new utility that can be used to test two values for absolute equality, without any of these exceptions. It's called Object.is(..):
 	
-	```
-	var a = 2 / "foo";
+```
+
+var a = 2 / "foo";
 var b = -3 * 0;
 
-Object.is( a, NaN );	// true
-Object.is( b, -0 );		// true
+Object.is( a, NaN );  // true
+Object.is( b, -0 );  // true
 
-Object.is( b, 0 );		// false
-	```
+Object.is( b, 0 );  // false
+
+```
 
 </details>
 
 <details>
 <summary>Value vs Reference</summary>
-	
-	```
-	function foo(x) {
-	x.push( 4 );
-	x; // [1,2,3,4]
 
-	// later
-	x = [4,5,6];
-	x.push( 7 );
-	x; // [4,5,6,7]
+```
+function foo(x) {
+x.push( 4 );
+x; // [1,2,3,4]
+
+// later
+x = [4,5,6];
+x.push( 7 );
+x; // [4,5,6,7]
 }
 
 var a = [1,2,3];
@@ -291,9 +296,11 @@ var a = [1,2,3];
 foo( a );
 
 a; // [1,2,3,4]  not  [4,5,6,7]
-	```
-	
-	When we pass in the argument a, it assigns a copy of the a reference to x. x and a are separate references pointing at the same [1,2,3] value. Now, inside the function, we can use that reference to mutate the value itself (push(4)). But when we make the assignment x = [4,5,6], this is in no way affecting where the initial reference a is pointing -- still points at the (now modified) [1,2,3,4] value.
+
+```
+
+When we pass in the argument a, it assigns a copy of the a reference to x. x and a are separate references pointing at the same [1,2,3] value. Now, inside the function, we can use that reference to mutate the value itself (push(4)). But when we make the assignment x = [4,5,6], this is in no way affecting where the initial reference a is pointing -- still points at the (now modified) [1,2,3,4] value.
+
 </details>
 
 <details>
