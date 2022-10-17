@@ -304,5 +304,67 @@ When we pass in the argument a, it assigns a copy of the a reference to x. x and
 </details>
 
 <details>
+<summary>String()</summary>
+
+```
+
+var a = new String( "abc" );
+
+typeof a; // "object" ... not "String"
+
+a instanceof String; // true
+
+Object.prototype.toString.call( a ); // "[object String]"
+
+```
+
+The point is, new String("abc") creates a string wrapper object around "abc", not just the primitive "abc" value itself.
+
+</details>
+
+<details>
+<summary>Object Wrapper Gotchas</summary>
+
+There are some gotchas with using the object wrappers directly that you should be aware of if you do choose to ever use them.
+
+For example, consider Boolean wrapped values:
+
+```
+
+var a = new Boolean( false );
+
+if (!a) {
+	console.log( "Oops" ); // never runs
+}
+
+```
+
+The problem is that you've created an object wrapper around the false value, but objects themselves are "truthy" (see Chapter 4), so using the object behaves oppositely to using the underlying false value itself, which is quite contrary to normal expectation.
+
+If you want to manually box a primitive value, you can use the Object(..) function (no new keyword):
+
+```
+
+var a = "abc";
+var b = new String( a );
+var c = Object( a );
+
+typeof a; // "string"
+typeof b; // "object"
+typeof c; // "object"
+
+b instanceof String; // true
+c instanceof String; // true
+
+Object.prototype.toString.call( b ); // "[object String]"
+Object.prototype.toString.call( c ); // "[object String]"
+
+```
+
+Again, using the boxed object wrapper directly (like b and c above) is usually discouraged, but there may be some rare occasions you'll run into where they may be useful.
+
+</details>
+
+<details>
 <summary></summary>
 </details>
