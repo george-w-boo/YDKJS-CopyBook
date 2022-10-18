@@ -366,5 +366,33 @@ Again, using the boxed object wrapper directly (like b and c above) is usually d
 </details>
 
 <details>
+<summary>Array as a native constructor</summary>
+
+So, if you wanted to actually create an array of actual undefined values (not just "empty slots"), how could you do it (besides manually)?
+
+```
+
+var a = Array.apply( null, { length: 3 } );
+a; // [ undefined, undefined, undefined ]
+
+```
+
+Confused? Yeah. Here's roughly how it works.
+
+apply(..) is a utility available to all functions, which calls the function it's used with but in a special way.
+
+The first argument is a this object binding (covered in the this & Object Prototypes title of this series), which we don't care about here, so we set it to null. The second argument is supposed to be an array (or something like an array -- aka an "array-like object"). The contents of this "array" are "spread" out as arguments to the function in question.
+
+So, Array.apply(..) is calling the Array(..) function and spreading out the values (of the { length: 3 } object value) as its arguments.
+
+Inside of apply(..), we can envision there's another for loop (kinda like join(..) from above) that goes from 0 up to, but not including, length (3 in our case).
+
+For each index, it retrieves that key from the object. So if the array-object parameter was named arr internally inside of the apply(..) function, the property access would effectively be arr[0], arr[1], and arr[2]. Of course, none of those properties exist on the { length: 3 } object value, so all three of those property accesses would return the value undefined.
+
+In other words, it ends up calling Array(..) basically like this: Array(undefined,undefined,undefined), which is how we end up with an array filled with undefined values, and not just those (crazy) empty slots.
+
+</details>
+
+<details>
 <summary></summary>
 </details>
