@@ -394,5 +394,141 @@ In other words, it ends up calling Array(..) basically like this: Array(undefine
 </details>
 
 <details>
+<summary>Converting Values</summary>
+
+Converting a value from one type to another is often called "type casting," when done explicitly, and "coercion" when done implicitly (forced by the rules of how a value is used).
+
+Another way these terms are often distinguished is as follows: "type casting" (or "type conversion") occur in statically typed languages at compile time, while "type coercion" is a runtime conversion for dynamically typed languages.
+
+However, in JavaScript, most people refer to all these types of conversions as coercion, so the way I prefer to distinguish is to say "implicit coercion" vs. "explicit coercion."
+
+```
+
+var a = 42;
+
+var b = a + "";	// implicit coercion
+
+var c = String( a );  // explicit coercion
+
+```
+
+</details>
+
+<details>
+<summary>.toJSON vs JSON.stringify</summary>
+
+It's a very common misconception that toJSON() should return a JSON stringification representation. That's probably incorrect, unless you're wanting to actually stringify the string itself (usually not!). toJSON() should return the actual regular value (of whatever type) that's appropriate, and JSON.stringify(..) itself will handle the stringification.
+
+In other words, toJSON() should be interpreted as "to a JSON-safe value suitable for stringification," not "to a JSON string" as many developers mistakenly assume.
+
+Consider:
+
+```
+
+var a = {
+	val: [1,2,3],
+
+	// probably correct!
+	toJSON: function(){
+		return this.val.slice( 1 );
+	}
+};
+
+var b = {
+	val: [1,2,3],
+
+	// probably incorrect!
+	toJSON: function(){
+		return "[" +
+			this.val.slice( 1 ).join() +
+		"]";
+	}
+};
+
+JSON.stringify( a ); // "[2,3]"
+
+JSON.stringify( b ); // ""[2,3]""
+
+```
+
+In the second call, we stringified the returned string rather than the array itself, which was probably not what we wanted to do.
+
+Remember, JSON.stringify(..) is not directly a form of coercion. We covered it here, however, for two reasons that relate its behavior to ToString coercion:
+
+string, number, boolean, and null values all stringify for JSON basically the same as how they coerce to string values via the rules of the ToString abstract operation.
+If you pass an object value to JSON.stringify(..), and that object has a toJSON() method on it, toJSON() is automatically called to (sort of) "coerce" the value to be JSON-safe before stringification.
+
+```
+
+</details>
+
+<details>
+<summary>Second argument for JSON.stringify</summary>
+
+An optional second argument can be passed to JSON.stringify(..) that is called replacer. This argument can either be an array or a function. It's used to customize the recursive serialization of an object by providing a filtering mechanism for which properties should and should not be included, in a similar way to how toJSON() can prepare a value for serialization.
+
+```
+
+var a = {
+	b: 42,
+	c: "42",
+	d: [1,2,3]
+};
+
+JSON.stringify( a, ["b","c"] ); // "{"b":42,"c":"42"}"
+
+JSON.stringify( a, function(k,v){
+	if (k !== "c") return v;
+} );
+// "{"b":42,"d":[1,2,3]}"
+
+```
+
+Note: In the function replacer case, the key argument k is undefined for the first call (where the a object itself is being passed in). The if statement filters out the property named "c". Stringification is recursive, so the [1,2,3] array has each of its values (1, 2, and 3) passed as v to replacer, with indexes (0, 1, and 2) as k.
+
+</details>
+
+<details>
+<summary>Optional third argument for JSON.stringify</summary>
+
+A third optional argument can also be passed to JSON.stringify(..), called space, which is used as indentation for prettier human-friendly output. space can be a positive integer to indicate how many space characters should be used at each indentation level. Or, space can be a string, in which case up to the first ten characters of its value will be used for each indentation level.
+
+```
+
+var a = {
+	b: 42,
+	c: "42",
+	d: [1,2,3]
+};
+
+JSON.stringify( a, null, 3 );
+// "{
+//    "b": 42,
+//    "c": "42",
+//    "d": [
+//       1,
+//       2,
+//       3
+//    ]
+// }"
+
+JSON.stringify( a, null, "-----" );
+// "{
+// -----"b": 42,
+// -----"c": "42",
+// -----"d": [
+// ----------1,
+// ----------2,
+// ----------3
+// -----]
+// }"
+
+</details>
+
+<details>
+<summary></summary>
+</details>
+
+<details>
 <summary></summary>
 </details>
