@@ -526,7 +526,30 @@ JSON.stringify( a, null, "-----" );
 </details>
 
 <details>
-<summary></summary>
+<summary>Falsy objects</summary>
+
+They are not these:
+
+```
+
+var a = new Boolean( false );
+var b = new Number( 0 );
+var c = new String( "" );
+
+```
+
+So, if "falsy objects" are not just objects wrapped around falsy values, what the heck are they?
+
+The tricky part is that they can show up in your JS program, but they're not actually part of JavaScript itself.
+
+A "falsy object" is a value that looks and acts like a normal object (properties, etc.), but when you coerce it to a boolean, it coerces to a false value.
+
+Why!?
+
+The most well-known case is document.all: an array-like (object) provided to your JS program by the DOM (not the JS engine itself), which exposes elements in your page to your JS program. It used to behave like a normal object--it would act truthy. But not anymore.
+
+So... that's what we've got: crazy, nonstandard "falsy objects" added to JavaScript by the browsers. Yay!
+
 </details>
 
 <details>
