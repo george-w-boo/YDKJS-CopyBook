@@ -553,5 +553,101 @@ So... that's what we've got: crazy, nonstandard "falsy objects" added to JavaScr
 </details>
 
 <details>
+<summary>Use case for ~</summary>
+
+```
+var a = "Hello World";
+
+~a.indexOf( "lo" );			// -4   <-- truthy!
+
+if (~a.indexOf( "lo" )) {	// true
+	// found it!
+}
+
+~a.indexOf( "ol" );			// 0    <-- falsy!
+!~a.indexOf( "ol" );		// true
+
+if (!~a.indexOf( "ol" )) {	// true
+	// not found!
+}
+
+```
+
+~ takes the return value of indexOf(..) and transforms it: for the "failure" -1 we get the falsy 0, and every other value is truthy.
+
+Note: The -(x+1) pseudo-algorithm for ~ would imply that ~-1 is -0, but actually it produces 0 because the underlying operation is actually bitwise, not mathematic.
+
+</details>
+
+<details>
+<summary>~~ vs Math.floor(..)</summary>
+
+ ~~ needs some caution/clarification. First, it only works reliably on 32-bit values. But more importantly, it doesn't work the same on negative numbers as Math.floor(..) does!
+
+```
+
+	Math.floor( -49.6 );	// -50
+~~-49.6;  // -49
+
+```
+
+</details>
+
+<details>
+<summary>Implicitly: Strings <--> Numbers</summary>
+
+```
+
+var a = [1,2];
+var b = [3,4];
+
+a + b; // "1,23,4"
+
+```
+
+According to ES5 spec section 11.6.1, the + algorithm (when an object value is an operand) will concatenate if either operand is either already a string, or if the following steps produce a string representation. So, when + receives an object (including array) for either operand, it first calls the ToPrimitive abstract operation (section 9.1) on the value, which then calls the [[DefaultValue]] algorithm (section 8.12.8) with a context hint of number.
+
+If you're paying close attention, you'll notice that this operation is now identical to how the ToNumber abstract operation handles objects (see the "ToNumber"" section earlier). The valueOf() operation on the array will fail to produce a simple primitive, so it then falls to a toString() representation. The two arrays thus become "1,2" and "3,4", respectively. Now, + concatenates the two strings as you'd normally expect: "1,23,4".
+
+____
+
+Comparing this implicit coercion of a + "" to our earlier example of String(a) explicit coercion, there's one additional quirk to be aware of. Because of how the ToPrimitive abstract operation works, a + "" invokes valueOf() on the a value, whose return value is then finally converted to a string via the internal ToString abstract operation. But String(a) just invokes toString() directly.
+
+Both approaches ultimately result in a string, but if you're using an object instead of a regular primitive number value, you may not necessarily get the same string value!
+
+Consider:
+
+```
+var a = {
+	valueOf: function() { return 42; },
+	toString: function() { return 4; }
+};
+
+a + "";			// "42"
+
+String( a );	// "4"
+
+```
+
+Generally, this sort of gotcha won't bite you unless you're really trying to create confusing data structures and operations, but you should be careful if you're defining both your own valueOf() and toString() methods for some object, as how you coerce the value could affect the outcome.
+
+____
+
+What about the other direction? How can we implicitly coerce from string to number?
+
+```
+
+var a = "3.14";
+var b = a - 0;
+
+b; // 3.14
+
+```
+
+The - operator is defined only for numeric subtraction, so a - 0 forces a's value to be coerced to a number. While far less common, a * 1 or a / 1 would accomplish the same result, as those operators are also only defined for numeric operations.
+
+</details>
+
+<details>
 <summary></summary>
 </details>
