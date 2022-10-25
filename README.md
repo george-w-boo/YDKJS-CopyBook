@@ -649,5 +649,105 @@ The - operator is defined only for numeric subtraction, so a - 0 forces a's valu
 </details>
 
 <details>
+<summary>Operators || and &&</summary>
+
+The value produced by a && or || operator is not necessarily of type Boolean. The value produced will always be the value of one of the two operand expressions:
+
+```
+
+var a = 42;
+var b = "abc";
+var c = null;
+
+a || b;		// 42
+a && b;		// "abc"
+
+c || b;		// "abc"
+c && b;		// null
+	
+```
+
+Both || and && operators perform a boolean test on the first operand (a or c). If the operand is not already boolean (as it's not, here), a normal ToBoolean coercion occurs, so that the test can be performed.
+
+For the || operator, if the test is true, the || expression results in the value of the first operand (a or c). If the test is false, the || expression results in the value of the second operand (b).
+
+Inversely, for the && operator, if the test is true, the && expression results in the value of the second operand (b). If the test is false, the && expression results in the value of the first operand (a or c).
+
+The result of a || or && expression is always the underlying value of one of the operands, not the (possibly coerced) result of the test. In c && b, c is null, and thus falsy. But the && expression itself results in null (the value in c), not in the coerced false used in the test.
+
+In fact, I would argue these operators shouldn't even be called "logical ___ operators", as that name is incomplete in describing what they do. If I were to give these operators a more accurate (if more clumsy) name, I'd call them "selector operators," or more completely, "operand selector operators."
+
+An extremely common and helpful usage of this behavior, which there's a good chance you may have used before and not fully understood, is:
+
+```
+
+function foo(a,b) {
+	a = a || "hello";
+	b = b || "world";
+
+	console.log( a + " " + b );
+}
+
+foo();					// "hello world"
+foo( "yeah", "yeah!" );	// "yeah yeah!"
+
+```
+
+This || idiom is extremely common, and quite helpful, but you have to use it only in cases where all falsy values should be skipped. Otherwise, you'll need to be more explicit in your test, and probably use a ? : ternary instead.
+</details>
+	
+<details>
+<summary>Symbol Coercion</summary>
+
+Explicit coercion of a symbol to a string is allowed, but implicit coercion of the same is disallowed and throws an error:
+
+```
+
+var s1 = Symbol( "cool" );
+String( s1 );					// "Symbol(cool)"
+
+var s2 = Symbol( "not cool" );
+s2 + "";						// TypeError
+
+```
+
+symbol values cannot coerce to number at all (throws an error either way), but strangely they can both explicitly and implicitly coerce to boolean (always true).
+
+</details>
+
+<details>
+<summary>Loose Equals vs. Strict Equals</summary>
+
+"== allows coercion in the equality comparison and === disallows coercion."
+	
+It's a very little known fact that == and === behave identically in the case where two objects are being compared!
+
+Let's again quote the spec, clauses 11.9.3.6-7 for loose ==:
+
+If Type(x) is Boolean, return the result of the comparison ToNumber(x) == y.
+If Type(y) is Boolean, return the result of the comparison x == ToNumber(y).
+	
+"42" == true is not performing a boolean test/coercion at all, no matter what your brain says. "42" is not being coerced to a boolean (true), but instead true is being coerced to a 1, and then "42" is being coerced to 42.
+
+Another example of implicit coercion can be seen with == loose equality between null and undefined values. Yet again quoting the ES5 spec, clauses 11.9.3.2-3:
+
+If x is null and y is undefined, return true.
+If x is undefined and y is null, return true.
+
+Which is why no need to do sth like this:
+	
+```
+	
+var a = doSomething();
+
+if (a === undefined || a === null) {
+	// ..
+}
+
+```
+
+</details>
+
+<details>
 <summary></summary>
 </details>
