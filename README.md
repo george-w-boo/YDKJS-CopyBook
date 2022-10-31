@@ -896,5 +896,68 @@ The third line contains just the expression b, but it's also a statement all by 
 </details>
 
 <details>
+<summary>Operator presedence</summary>
+
+```
+
+var a = 42, b;
+b = ( a++, a );
+
+a;	// 43
+b;	// 43
+
+```
+
+But what would happen if we remove the ( )?
+
+```
+
+var a = 42, b;
+b = a++, a;
+
+a;	// 43
+b;	// 42
+
+```
+
+Because the , operator has a lower precedence than the = operator. So, b = a++, a is interpreted as (b = a++), a. Because (as we explained earlier) a++ has after side effects, the assigned value to b is the value 42 before the ++ changes a.
+
+This is just a simple matter of needing to understand operator precedence. If you're going to use , as a statement-series operator, it's important to know that it actually has the lowest precedence. Every other operator will more tightly bind than , will.
+
+</details>
+
+<details>
+<summary>Temporal Dead Zone</summary>
+
+The TDZ refers to places in code where a variable reference cannot yet be made, because it hasn't reached its required initialization.
+
+The most clear example of this is with ES6 let block-scoping:
+
+```
+
+{
+	a = 2;		// ReferenceError!
+	let a;
+}
+
+```
+
+The assignment a = 2 is accessing the a variable (which is indeed block-scoped to the { .. } block) before it's been initialized by the let a declaration, so it's in the TDZ for a and throws an error.
+
+Interestingly, while typeof has an exception to be safe for undeclared variables (see Chapter 1), no such safety exception is made for TDZ references:
+
+```
+
+{
+	typeof a;	// undefined
+	typeof b;	// ReferenceError! (TDZ)
+	let b;
+}
+
+```
+
+</details>
+
+<details>
 <summary></summary>
 </details>
