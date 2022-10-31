@@ -872,5 +872,29 @@ Number( a ) < Number( b );	// true -- number comparison!
 </details>
 
 <details>
+<summary>Statements vs Expressions</summary>
+
+A "sentence" is one complete formation of words that expresses a thought. It's comprised of one or more "phrases," each of which can be connected with punctuation marks or conjunction words ("and," "or," etc). A phrase can itself be made up of smaller phrases. Some phrases are incomplete and don't accomplish much by themselves, while other phrases can stand on their own. These rules are collectively called the grammar of the English language.
+
+And so it goes with JavaScript grammar. Statements are sentences, expressions are phrases, and operators are conjunctions/punctuation.
+
+Every expression in JS can be evaluated down to a single, specific value result. For example:
+
+```
+
+var a = 3 * 6;
+var b = a;
+b;
+
+```
+
+In this snippet, 3 * 6 is an expression (evaluates to the value 18). But a on the second line is also an expression, as is b on the third line. The a and b expressions both evaluate to the values stored in those variables at that moment, which also happens to be 18.
+
+Moreover, each of the three lines is a statement containing expressions. var a = 3 * 6 and var b = a are called "declaration statements" because they each declare a variable (and optionally assign a value to it). The a = 3 * 6 and b = a assignments (minus the vars) are called assignment expressions.
+
+The third line contains just the expression b, but it's also a statement all by itself (though not a terribly interesting one!). This is generally referred to as an "expression statement."
+</details>
+
+<details>
 <summary></summary>
 </details>
