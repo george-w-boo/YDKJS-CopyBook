@@ -1063,5 +1063,32 @@ Normally, the omission of return in a function is the same as return; or even re
 </details>
 
 <details>
+<summary>Global DOM Variables</summary>
+
+You're probably aware that declaring a variable in the global scope (with or without var) creates not only a global variable, but also its mirror: a property of the same name on the global object (window in the browser).
+
+But what may be less common knowledge is that (because of legacy browser behavior) creating DOM elements with id attributes creates global variables of those same names. For example:
+
+```
+
+<div id="foo"></div>
+
+```
+
+And:
+
+```
+
+if (typeof foo == "undefined") {
+	foo = 42;		// will never run
+}
+
+console.log( foo );	// HTML element
+
+```
+
+</details>
+
+<details>
 <summary></summary>
 </details>
