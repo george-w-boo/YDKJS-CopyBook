@@ -956,6 +956,110 @@ Interestingly, while typeof has an exception to be safe for undeclared variables
 
 ```
 
+Another example of a TDZ violation can be seen with ES6 default parameter values:
+
+```
+
+var b = 3;
+
+function foo( a = 42, b = a + b + 5 ) {
+	// ..
+}
+
+```
+
+The b reference in the assignment would happen in the TDZ for the parameter b (not pull in the outer b reference), so it will throw an error. However, the a in the assignment is fine since by that time it's past the TDZ for parameter a.
+
+</details>
+
+<details>
+<summary>Function arguments</summary>
+
+There's no difference between omitting an argument and passing an undefined value. However, there is a way to detect the difference in some cases:
+
+```
+
+function foo( a = 42, b = a + 1 ) {
+	console.log(
+		arguments.length, a, b,
+		arguments[0], arguments[1]
+	);
+}
+
+foo();					// 0 42 43 undefined undefined
+foo( 10 );				// 1 10 11 10 undefined
+foo( 10, undefined );	// 2 10 11 10 undefined
+foo( 10, null );		// 2 10 null 10 null
+
+```
+
+Even though the default parameter values are applied to the a and b parameters, if no arguments were passed in those slots, the arguments array will not have entries.
+
+Conversely, if you pass an undefined argument explicitly, an entry will exist in the arguments array for that argument, but it will be undefined and not (necessarily) the same as the default value that was applied to the named parameter for that same slot.
+
+
+</details>
+
+<details>
+<summary>try...finally</summary>
+
+```
+
+for (var i=0; i<10; i++) {
+	try {
+		continue;
+	}
+	finally {
+		console.log( i );
+	}
+}
+// 0 1 2 3 4 5 6 7 8 9
+
+```
+
+The console.log(i) statement runs at the end of the loop iteration, which is caused by the continue statement. However, it still runs before the i++ iteration update statement, which is why the values printed are 0..9 instead of 1..10.
+
+A return inside a finally has the special ability to override a previous return from the try or catch clause, but only if return is explicitly called:
+
+```
+
+function foo() {
+	try {
+		return 42;
+	}
+	finally {
+		// no `return ..` here, so no override
+	}
+}
+
+function bar() {
+	try {
+		return 42;
+	}
+	finally {
+		// override previous `return 42`
+		return;
+	}
+}
+
+function baz() {
+	try {
+		return 42;
+	}
+	finally {
+		// override previous `return 42`
+		return "Hello";
+	}
+}
+
+foo();	// 42
+bar();	// undefined
+baz();	// "Hello"
+		   
+```
+
+Normally, the omission of return in a function is the same as return; or even return undefined;, but inside a finally block the omission of return does not act like an overriding return undefined; it just lets the previous return stand.
+
 </details>
 
 <details>
